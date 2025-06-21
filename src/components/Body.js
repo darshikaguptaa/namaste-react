@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react"
 import RestrauntCard from "./RestrauntCard.js"
 import Shimmer from "./Shimmer.js"
+import { Link } from "react-router-dom"
 
 const Body = () => {
 	const [listOfRestraunts, setListOfRestraunts] = useState([])
+	const [searchText, setSearchText] = useState("")
+	const [filteredRestraunt, setFilteredRestraunt] = useState([])
+
+	console.log("Rendered")
 
 	useEffect(() => {
 		fetchData()
@@ -19,6 +24,9 @@ const Body = () => {
 		setListOfRestraunts(
 			json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants
 		)
+		setFilteredRestraunt(
+			json?.data?.cards[1]?.card?.card?.gridElements?.infoWithStyle?.restaurants
+		)
 	}
 
 	return listOfRestraunts.length === 0 ? (
@@ -26,13 +34,37 @@ const Body = () => {
 	) : (
 		<div className="body">
 			<div className="filter">
+				<div>
+					<input
+						type="text"
+						className="search-box"
+						value={searchText}
+						onChange={(e) => {
+							setSearchText(e.target.value)
+						}}
+					></input>
+					<button
+						onClick={() => {
+							console.log(searchText)
+							const filteredRes = listOfRestraunts.filter((res) => {
+								return res.info.name
+									.toLowerCase()
+									.includes(searchText.toLowerCase())
+							})
+							console.log(filteredRes)
+							setFilteredRestraunt(filteredRes)
+						}}
+					>
+						Search
+					</button>
+				</div>
 				<button
 					className="filterBtn"
 					onClick={() => {
 						//Filter Logic
-						setListOfRestraunts(
+						setFilteredRestraunt(
 							listOfRestraunts.filter((restraunt) => {
-								return restraunt.info.avgRating > 4
+								return restraunt.info.avgRating > 4.1
 							})
 						)
 					}}
@@ -41,8 +73,10 @@ const Body = () => {
 				</button>
 			</div>
 			<div className="restrauntContainer">
-				{listOfRestraunts.map((restraunt) => (
-					<RestrauntCard resData={restraunt} key={restraunt.info.id} />
+				{filteredRestraunt.map((restraunt) => (
+					<Link key={restraunt.info.id} to={"/restraunt/" + restraunt.info.id}>
+						<RestrauntCard resData={restraunt} />
+					</Link>
 				))}
 			</div>
 		</div>
